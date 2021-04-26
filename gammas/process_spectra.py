@@ -22,15 +22,16 @@ def main():
     """
     """
     parser = argparse.ArgumentParser(description='Processes a database of gamma spectra into count windows.')
-    parser.add_argument('detector', metavar='detector-descrip', 
+    parser.add_argument('detector', choices=['d1', 'd2', 'd3', 'd6'], 
                         help='string indicating a detector for which the spectra are being processed')
     args = parser.parse_args(sys.argv[1:])
     
     # grab energy bins to create list of peaks training set
     # created in en windows notebook using source activities of idx 88087
-    path = '/mnt/researchdrive/BOX_INTERNAL/opotowsky/detector_response/'
+    path = '/mnt/researchdrive/BOX_INTERNAL/opotowsky/'
+    gad_path = path + 'detector_response/'
     en_windows_fname = 'idx88087_energy_list_113.pkl'
-    with open(path + en_windows_fname, 'rb') as filehandle:
+    with open(gad_path + en_windows_fname, 'rb') as filehandle:
         en_windows = pickle.load(filehandle)
     # grab labels for the tracked peaks training set
     actsdf = pd.read_pickle(path + 'nuc32_activities_scaled_1g_reindex.pkl')
@@ -57,14 +58,14 @@ def main():
                            },
                    }
     
-    results_path = path + detect_info[args.detector]['det_path']
-    energy_bins = get_energy_bins(results_path + 'energy_bins.dat')
+    detect_path = gad_path + detect_info[args.detector]['det_path']
+    energy_bins = get_energy_bins(detect_path + 'energy_bins.dat')
     en_delta = detect_info[args.detector]['en_delta']
     # output of `ls -1 | wc -l` in d1 directory is 5008 
     # need to exclude energy_bins.dat: range is 0 --> 5006(+1)
     for i in range(0, 5007):
-    #for i in range(0,10): #for shorter train set
-        gz = results_path + str(i) + '.dat.gz'
+    #for i in range(0,1): #for shorter train set
+        gz = detect_path + str(i) + '.dat.gz'
         gzdf = pd.read_csv(gz, sep=' ', index_col=0, header=None, usecols=range(0, 8193), names=['DbIdx',]+energy_bins, compression='gzip')
         windf = pd.DataFrame(columns=en_windows)
         for en in en_windows:
@@ -78,7 +79,7 @@ def main():
     
     #lbls_df = actsdf.iloc[0:peaksdf.index.tolist()[-1]+1][lbls] #for making shorter train set
     labeled_peaksdf = pd.concat([lbls_df, peaksdf], axis=1)
-    labeled_peaksdf.to_pickle(path + detect_info[args.detector]['pkl_name'], compression='gzip')
+    labeled_peaksdf.to_pickle(gad_path + detect_info[args.detector]['pkl_name'], compression='gzip')
 
     return
 
