@@ -42,18 +42,18 @@ def main():
 
     parser = argparse.ArgumentParser(description='Concatenates the contents of all CSVs in a directory')
     parser.add_argument('results_dir', metavar='results-directory',
-                        help='name of directory with results')
+                        help='name of directory with results, e.g. gam_spec/d1')
     args = parser.parse_args(sys.argv[1:])
     
     for unc_dir in job_dirs:
-        results_path = '/home/opotowsky/sims_n_results/final_sims_nov2020/' \
+        results_path = '/mnt/researchdrive/BOX_INTERNAL/opotowsky/mll/' \
                        + args.results_dir + '/' + unc_dir + '/'
         csvs = sorted(glob.glob(results_path + '*.csv'))
         pred_df = pd.concat((pd.read_csv(csv, header = 0) for csv in csvs))
         
-        # copied lbls from mll_calc.py for now
-        lbls = ['ReactorType', 'CoolingTime', 'Enrichment', 'Burnup', 'OrigenReactor']
-        pred_df = calc_errors(pred_df, lbls)
+        # doing error calc using scikit methods in jupyter NB now
+        #lbls = ['ReactorType', 'CoolingTime', 'Enrichment', 'Burnup', 'OrigenReactor']
+        #pred_df = calc_errors(pred_df, lbls) 
         
         pred_df.to_csv(results_path + unc_dir + '.csv')
 
