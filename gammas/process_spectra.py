@@ -52,6 +52,14 @@ def main():
                            'en_delta' : 20,
                            'pkl_name' : 'd3_czt_spectra_peaks_trainset.pkl.gz'
                            },
+                   'd4' : {'det_path' : 'd4_nai/',
+                           'en_delta' : 20,
+                           'pkl_name' : 'd4_nai_spectra_peaks_trainset.pkl.gz'
+                           },
+                   'd5' : {'det_path' : 'd5_labr3/',
+                           'en_delta' : 20,
+                           'pkl_name' : 'd5_labr3_spectra_peaks_trainset.pkl.gz'
+                           },
                    'd6' : {'det_path' : 'd6_sri2/',
                            'en_delta' : 20,
                            'pkl_name' : 'd6_sri2_spectra_peaks_trainset.pkl.gz'
