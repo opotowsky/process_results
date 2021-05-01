@@ -42,7 +42,7 @@ def main():
 
     parser = argparse.ArgumentParser(description='Concatenates the contents of all CSVs in a directory')
     parser.add_argument('results_dir', metavar='results-directory',
-                        help='name of directory with results, e.g. gam_spec/d1')
+                        help='name of directory with results, e.g. gam_spec/d1_n113')
     args = parser.parse_args(sys.argv[1:])
     
     for unc_dir in job_dirs:
@@ -51,9 +51,8 @@ def main():
         csvs = sorted(glob.glob(results_path + '*.csv'))
         pred_df = pd.concat((pd.read_csv(csv, header = 0) for csv in csvs))
         
-        # doing error calc using scikit methods in jupyter NB now
-        #lbls = ['ReactorType', 'CoolingTime', 'Enrichment', 'Burnup', 'OrigenReactor']
-        #pred_df = calc_errors(pred_df, lbls) 
+        lbls = ['ReactorType', 'CoolingTime', 'Enrichment', 'Burnup', 'OrigenReactor']
+        pred_df = calc_errors(pred_df, lbls) 
         
         pred_df.to_csv(results_path + unc_dir + '.csv')
 
