@@ -44,12 +44,12 @@ def main():
     detect_info = {'d1' : {'det_path' : 'd1_hpge/',
                            'en_delta' : 2,
                            'num_channels' : 8192,
-                           'pkl_name' : 'd1_hpge_spectra_peaks_trainset.pkl.gz'
+                           'pkl_name' : 'd1_hpge_spectra_31peaks_trainset.pkl.gz'
                            },
                    'd2' : {'det_path' : 'd2_detective_hpge/',
                            'en_delta' : 3,
                            'num_channels' : 8192,
-                           'pkl_name' : 'd2_hpge_spectra_peaks_trainset.pkl.gz'
+                           'pkl_name' : 'd2_hpge_spectra_31peaks_trainset.pkl.gz'
                            },
                    'd3' : {'det_path' : 'd3_czt/',
                            'en_delta' : 8,
