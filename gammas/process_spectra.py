@@ -67,9 +67,9 @@ def main():
                            'pkl_name' : 'd5_labr3_spectra_peaks_trainset.pkl.gz'
                            },
                    'd6' : {'det_path' : 'd6_sri2/',
-                           'en_delta' : 20,
+                           'en_delta' : 10,
                            'num_channels' : 1024,
-                           'pkl_name' : 'd6_sri2_spectra_peaks_trainset.pkl.gz'
+                           'pkl_name' : 'd6_sri2_spectra_31peaks_trainset.pkl.gz'
                            },
                    }
     
