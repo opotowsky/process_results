@@ -22,16 +22,23 @@ def main():
     """
     """
     parser = argparse.ArgumentParser(description='Processes a database of gamma spectra into count windows.')
-    parser.add_argument('detector', choices=['d1', 'd2', 'd3', 'd4', 'd5', 'd6'], 
+    parser.add_argument('detpath', metavar='detector-path', 
                         help='string indicating a detector for which the spectra are being processed')
+    parser.add_argument('winlist', metavar = 'window-list',
+                        help='list of energy windows to process spectra into training set')
+    parser.add_argument('delta', metavar = 'energy-delta', type=int,
+                        help='value in keV that forms size of energy window')
+    parser.add_argument('nchannel', metavar = 'num-channels', type=int,
+                        help='number of channels of spectra for given detector')
+    parser.add_argument('pklname', metavar = 'pickle-name',
+                        help='filename for trainset output')
     args = parser.parse_args(sys.argv[1:])
     
     # grab energy bins to create list of peaks training set
     # created in en windows notebook using source activities of idx 88087
     path = '/mnt/researchdrive/BOX_INTERNAL/opotowsky/'
     gad_path = path + 'detector_response/'
-    #en_windows_fname = 'idx88087_energy_list_113.pkl'
-    en_windows_fname = 'idx88087_energy_list_31.pkl'
+    en_windows_fname = args.winlist
     with open(gad_path + en_windows_fname, 'rb') as filehandle:
         en_windows = pickle.load(filehandle)
     # grab labels for the tracked peaks training set
@@ -41,46 +48,14 @@ def main():
             ]
     lbls_df = actsdf[lbls]
 
-    detect_info = {'d1' : {'det_path' : 'd1_hpge/',
-                           'en_delta' : 2,
-                           'num_channels' : 8192,
-                           'pkl_name' : 'd1_hpge_spectra_31peaks_trainset.pkl.gz'
-                           },
-                   'd2' : {'det_path' : 'd2_detective_hpge/',
-                           'en_delta' : 3,
-                           'num_channels' : 8192,
-                           'pkl_name' : 'd2_hpge_spectra_31peaks_trainset.pkl.gz'
-                           },
-                   'd3' : {'det_path' : 'd3_czt/',
-                           'en_delta' : 8,
-                           'num_channels' : 1024,
-                           'pkl_name' : 'd3_czt_spectra_31peaks_trainset.pkl.gz'
-                           },
-                   'd4' : {'det_path' : 'd4_nai/',
-                           'en_delta' : 12,
-                           'num_channels' : 1024,
-                           'pkl_name' : 'd4_nai_spectra_31peaks_trainset.pkl.gz'
-                           },
-                   'd5' : {'det_path' : 'd5_labr3/',
-                           'en_delta' : 12,
-                           'num_channels' : 1024,
-                           'pkl_name' : 'd5_labr3_spectra_31peaks_trainset.pkl.gz'
-                           },
-                   'd6' : {'det_path' : 'd6_sri2/',
-                           'en_delta' : 10,
-                           'num_channels' : 1024,
-                           'pkl_name' : 'd6_sri2_spectra_31peaks_trainset.pkl.gz'
-                           },
-                   }
-    
-    detect_path = gad_path + detect_info[args.detector]['det_path']
+    detect_path = gad_path + args.detpath
     energy_bins = get_energy_bins(detect_path + 'energy_bins.dat')
-    en_delta = detect_info[args.detector]['en_delta']
-    nchan = detect_info[args.detector]['num_channels']
-    # output of `ls -1 | wc -l` in d1 directory is 5008 
+    en_delta = args.delta
+    nchan = args.nchannel
+    # output of `ls -1 | wc -l` in det directories is 5008
     # need to exclude energy_bins.dat: range is 0 --> 5006(+1)
     for i in range(0, 5007):
-    #for i in range(0,1): #for shorter train set
+    #for i in range(0,1): #for shorter train set to test code
         gz = detect_path + str(i) + '.dat.gz'
         gzdf = pd.read_csv(gz, sep=' ', index_col=0, header=None, usecols=range(0, nchan+1), names=['DbIdx',]+energy_bins, compression='gzip')
         windf = pd.DataFrame(columns=en_windows)
@@ -93,9 +68,9 @@ def main():
         else:
             peaksdf = peaksdf.append(windf)
     
-    #lbls_df = actsdf.iloc[0:peaksdf.index.tolist()[-1]+1][lbls] #for making shorter train set
+    #lbls_df = actsdf.iloc[0:peaksdf.index.tolist()[-1]+1][lbls] #for making shorter train set to test code
     labeled_peaksdf = pd.concat([lbls_df, peaksdf], axis=1)
-    labeled_peaksdf.to_pickle(gad_path + detect_info[args.detector]['pkl_name'], compression='gzip')
+    labeled_peaksdf.to_pickle(gad_path + args.pklname, compression='gzip')
 
     return
 

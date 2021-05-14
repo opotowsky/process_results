@@ -1,0 +1,4 @@
+d3_czt/ idx88087_energy_list_113.pkl 8 1024 d3_czt_spectra_113peaks_trainset.pkl.gz
+d4_nai/ idx88087_energy_list_113.pkl 12 1024 d4_nai_spectra_113peaks_trainset.pkl.gz
+d5_labr3/ idx88087_energy_list_113.pkl 12 1024 d5_labr3_spectra_113peaks_trainset.pkl.gz
+d6_sri2/ idx88087_energy_list_113.pkl 10 1024 d6_sri2_spectra_113peaks_trainset.pkl.gz
