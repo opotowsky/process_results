@@ -1,6 +1,3 @@
-d1_hpge/ idxYY_energy_list_xx.pkl 2 8192 d1_hpge_spectra_xxpeaks_trainset.pkl.gz
-d2_detective_hpge/ idxYY_energy_list_xx.pkl 3 8192 d2_hpge_spectra_xxpeaks_trainset.pkl.gz
-d3_czt/ idxYY_energy_list_xx.pkl 8 1024 d3_czt_spectra_xxpeaks_trainset.pkl.gz
-d4_nai/ idxYY_energy_list_xx.pkl 12 1024 d4_nai_spectra_xxpeaks_trainset.pkl.gz
-d5_labr3/ idxYY_energy_list_xx.pkl 12 1024 d5_labr3_spectra_xxpeaks_trainset.pkl.gz
-d6_sri2/ idxYY_energy_list_xx.pkl 10 1024 d6_sri2_spectra_xxpeaks_trainset.pkl.gz
+d1_hpge/ d1_energy_list_auto.pkl 2 8192 d1_hpge_spectra_auto_peaks_trainset.pkl.gz
+d2_detective_hpge/ d2_energy_list_auto.pkl 3 8192 d2_hpge_spectra_auto_peaks_trainset.pkl.gz
+d3_czt/ d3_energy_list_auto.pkl 8 1024 d3_czt_spectra_auto_peaks_trainset.pkl.gz
