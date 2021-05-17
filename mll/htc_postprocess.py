@@ -5,7 +5,7 @@ import glob
 import argparse
 import numpy as np
 import pandas as pd
-from mll_calc.all_jobs import job_dirs
+#from mll_calc.all_jobs import job_dirs
 
 def calc_errors(pred_df, true_lbls):
     """
@@ -43,18 +43,19 @@ def main():
     parser = argparse.ArgumentParser(description='Concatenates the contents of all CSVs in a directory')
     parser.add_argument('results_dir', metavar='results-directory',
                         help='name of directory with results, e.g. gam_spec/d1_n113')
+    parser.add_argument('unc_dir', metavar='uncertainty-directory',
+                        help='name of uncertainty directory within results dir, e.g. Job1_unc0.0')
     args = parser.parse_args(sys.argv[1:])
     
-    for unc_dir in job_dirs:
-        results_path = '/mnt/researchdrive/BOX_INTERNAL/opotowsky/mll/' \
-                       + args.results_dir + '/' + unc_dir + '/'
-        csvs = sorted(glob.glob(results_path + '*.csv'))
-        pred_df = pd.concat((pd.read_csv(csv, header = 0) for csv in csvs))
-        
-        lbls = ['ReactorType', 'CoolingTime', 'Enrichment', 'Burnup', 'OrigenReactor']
-        pred_df = calc_errors(pred_df, lbls) 
-        
-        pred_df.to_csv(results_path + unc_dir + '.csv')
+    results_path = '/mnt/researchdrive/BOX_INTERNAL/opotowsky/mll/' \
+                   + args.results_dir + '/' + args.unc_dir + '/'
+    csvs = sorted(glob.glob(results_path + '*.csv'))
+    pred_df = pd.concat((pd.read_csv(csv, header = 0) for csv in csvs))
+    
+    lbls = ['ReactorType', 'CoolingTime', 'Enrichment', 'Burnup', 'OrigenReactor']
+    pred_df = calc_errors(pred_df, lbls) 
+    
+    pred_df.to_csv(results_path + args.unc_dir + '.csv')
 
     return
 
