@@ -6,11 +6,10 @@
 # params_process_spectra.txt. 
 
 # already done
+#d1_hpge/ idx88087_energy_list_d1auto.pkl 2 8192 d1_hpge_spectra_auto_peaks_trainset.pkl.gz
+#d2_detective_hpge/ idx88087_energy_list_d2auto.pkl 3 8192 d2_hpge_spectra_auto_peaks_trainset.pkl.gz
 
 # not yet done
-#d4_nai/ idxYY_energy_list_xx.pkl 12 1024 d4_nai_spectra_xxpeaks_trainset.pkl.gz
-#d5_labr3/ idxYY_energy_list_xx.pkl 12 1024 d5_labr3_spectra_xxpeaks_trainset.pkl.gz
-#d6_sri2/ idxYY_energy_list_xx.pkl 10 1024 d6_sri2_spectra_xxpeaks_trainset.pkl.gz
 
 while read p; do
     time ./process_spectra.py $p
