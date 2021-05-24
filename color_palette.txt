@@ -1,0 +1,3 @@
+{'DBrwn' : '#452704', 'MBrwn' : '#874d08', 'LBrwn' : '#d4790d',
+ 'DTeal' : '#0b3f40', 'MTeal' : '#158285', 'LTeal' : '#0bcfd4',
+ 'DPurp' : '#450a4f', 'MPurp' : '#762a83', 'LPurp' : '#e283f2'}
