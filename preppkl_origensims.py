@@ -165,8 +165,8 @@ def main():
         testset = False
     pkl_labels = datapath + args.pkl_name
     data_set_labels = pickle.load(open(pkl_labels, 'rb'))
-    opus_files = ['_nuc62',]# '_nuc40']
-    for ofile in opus_files:
+    opus_files = {'_nuc29' : '_masses.pkl', '_nuc62' : '_activities.pkl'}
+    for ofile, pkl_end in opus_files.items():
         for i, sim in enumerate(data_set_labels, 1):
             o_rxtr = sim['OrigenReactor']
             enrich = sim['Enrichment']
@@ -183,8 +183,8 @@ def main():
         dataXY = dataframeXY(data_set_labels, ofile)
         if '00' in ofile:
             ofile = 'gspec'
-        pkl_set = 'not-scaled' + ofile + '_activities.pkl'
-        pickle.dump(dataXY, open(pkl_set, 'wb'), protocol=2)
+        pkl_set = 'not-scaled' + ofile + pkl_end
+        pickle.dump(dataXY, open(pkl_set, 'wb'), protocol=4)
     return
 
 if __name__ == "__main__":
