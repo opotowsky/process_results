@@ -35,7 +35,7 @@ def main():
     args = parser.parse_args(sys.argv[1:])
     
     # grab energy bins to create list of peaks training set
-    # created in en windows notebook using source activities of idx 88087
+    # created in en windows notebook using sets from multiple idxs
     path = '/mnt/researchdrive/BOX_INTERNAL/opotowsky/'
     gad_path = path + 'detector_response/'
     en_windows_fname = args.winlist
@@ -52,9 +52,9 @@ def main():
     energy_bins = get_energy_bins(detect_path + 'energy_bins.dat')
     en_delta = args.delta
     nchan = args.nchannel
-    # output of `ls -1 | wc -l` in det directories is 5008
-    # need to exclude energy_bins.dat: range is 0 --> 5006(+1)
-    for i in range(0, 5007):
+    # output of `ls -1 | wc -l` in det directories is 6005
+    # need to exclude energy_bins.dat: range is 0 --> 6003(+1)
+    for i in range(0, 6004):
     #for i in range(0,1): #for shorter train set to test code
         gz = detect_path + str(i) + '.dat.gz'
         gzdf = pd.read_csv(gz, sep=' ', index_col=0, header=None, usecols=range(0, nchan+1), names=['DbIdx',]+energy_bins, compression='gzip')
@@ -70,7 +70,7 @@ def main():
     
     #lbls_df = actsdf.iloc[0:peaksdf.index.tolist()[-1]+1][lbls] #for making shorter train set to test code
     labeled_peaksdf = pd.concat([lbls_df, peaksdf], axis=1)
-    labeled_peaksdf.to_pickle(gad_path + args.pklname, compression='gzip')
+    labeled_peaksdf.to_pickle(gad_path + args.pklname, compression='gzip', protocol=4)
 
     return
 
