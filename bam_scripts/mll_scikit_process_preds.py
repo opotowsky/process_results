@@ -2,22 +2,7 @@
 
 import pickle
 import pandas as pd
-from sklearn.metrics import balanced_accuracy_score, mean_absolute_error
-
-#def save_abs_errors(p, mll, knn, dtr):
-#    predmll = ['ReactorType', 'Burnup', 'Enrichment', 'CoolingTime']
-#    llmetric = '_Score'
-#    llmetric = '_Error'
-#    errname = 'AbsError'    
-#
-#    knn['AbsError']
-#    dtr['AbsError']
-#    mll[en_list][j][predmll[i] + llmetric]
-#    
-#    with open(rdrive + 'mll_scikit_compare_abs_errors' + pred  + '.pkl', 'wb') as pkl:
-#        pickle.dump(results, pkl)
-#    
-#    return
+from sklearn.metrics import balanced_accuracy_score, mean_absolute_error, median_absolute_error
 
 def rxtr_metrics(i, df, d, mll, knn, dtr):
     predmll = ['ReactorType', 'Burnup', 'Enrichment', 'CoolingTime']
@@ -39,22 +24,45 @@ def rxtr_metrics(i, df, d, mll, knn, dtr):
             df.loc[d, (a+en_list, dfstd)] = alg[en_list][errname].std()
     return df
 
-def reg_metrics(i, df, d, mll, knn, dtr):
+def reg_metrics(i, df, d, mll, knn, dtr, mean_or_med):
     predmll = ['ReactorType', 'Burnup', 'Enrichment', 'CoolingTime']
     llmetric = '_Error'
     dfmetric = 'Neg MAE'
     dfstd = 'MAE Std'
     errname = 'AbsError'    
+    dfmetric1 = 'Neg MedAE SK'
+    dfmetric2 = 'Neg MedAE'
+    dfiqr1 = 'MedAE IQR_25'
+    dfiqr2 = 'MedAE IQR_75'
     for en_list in ['31', '_auto', '113']:
-        ### MLL ###
-        df.loc[d, ('mll'+en_list, dfmetric)] = -mean_absolute_error(mll[en_list][predmll[i]], 
-                                                                    mll[en_list]['pred_' + predmll[i]])
-        df.loc[d, ('mll'+en_list, dfstd)] = mll[en_list][predmll[i] + llmetric].std()
-        ### Scikit ###
-        for a, A, alg in zip(['knn', 'dtree'], ['kNN', 'DTree'], [knn, dtr]):
-            df.loc[d, (a+en_list, dfmetric)] = -mean_absolute_error(alg[en_list]['TrueY'], 
-                                                                    alg[en_list][A])
-            df.loc[d, (a+en_list, dfstd)] = alg[en_list][errname].std()
+        if mean_or_med == 'mean':
+            ### MLL ###
+            df.loc[d, ('mll'+en_list, dfmetric)] = -mean_absolute_error(mll[en_list][predmll[i]], 
+                                                                        mll[en_list]['pred_' + predmll[i]])
+            df.loc[d, ('mll'+en_list, dfstd)] = mll[en_list][predmll[i] + llmetric].std()
+            ### Scikit ###
+            for a, A, alg in zip(['knn', 'dtree'], ['kNN', 'DTree'], [knn, dtr]):
+                df.loc[d, (a+en_list, dfmetric)] = -mean_absolute_error(alg[en_list]['TrueY'], 
+                                                                        alg[en_list][A])
+                df.loc[d, (a+en_list, dfstd)] = alg[en_list][errname].std()
+        else:
+            ### MLL ###
+            q = ['25%', '75%']
+            med = '50%'
+            df.loc[d, ('mll'+en_list, dfmetric1)] = -median_absolute_error(mll[en_list][predmll[i]], 
+                                                                          mll[en_list]['pred_' + predmll[i]])
+            col = mll[en_list][predmll[i] + llmetric]
+            df.loc[d, ('mll'+en_list, dfmetric2)] = -col.describe()[med]
+            df.loc[d, ('mll'+en_list, dfiqr1)] = -col.describe()[q[0]]
+            df.loc[d, ('mll'+en_list, dfiqr2)] = -col.describe()[q[1]]
+            ### Scikit ###
+            for a, A, alg in zip(['knn', 'dtree'], ['kNN', 'DTree'], [knn, dtr]):
+                df.loc[d, (a+en_list, dfmetric1)] = -median_absolute_error(alg[en_list]['TrueY'], 
+                                                                          alg[en_list][A])
+                col = alg[en_list][errname]
+                df.loc[d, (a+en_list, dfmetric2)] = -col.describe()[med]
+                df.loc[d, (a+en_list, dfiqr1)] = -col.describe()[q[0]]
+                df.loc[d, (a+en_list, dfiqr2)] = -col.describe()[q[1]]
     return df
 
 def main():
@@ -142,15 +150,14 @@ def main():
             mll_d = {'31' : mll31[j], '_auto' : mll_auto[j], '113' : mll113[j]}
             knn = {'31' : knn31, '_auto' : knn_auto, '113' : knn113}
             dtr = {'31' : dtr31, '_auto' : dtr_auto, '113' : dtr113}
-            #save_abs_errors(p, mll, knn, dtr)
             if p == 'reactor':
                 df = rxtr_metrics(i, df, d, mll_d, knn, dtr)
             else:
-                df = reg_metrics(i, df, d, mll_d, knn, dtr)
+                df = reg_metrics(i, df, d, mll_d, knn, dtr, 'med')
         results[p] = df
         print('{} pred df complete'.format(p), flush=True)
     
-    with open(rdrive + 'processed_results/metrics_results_dict_mll_scikit_compare.pkl', 'wb') as pkl:
+    with open(rdrive + 'processed_results/median_err_metrics_results_dict_mll_scikit_compare.pkl', 'wb') as pkl:
         pickle.dump(results, pkl)
 
     return
