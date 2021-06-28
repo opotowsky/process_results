@@ -1,0 +1,2 @@
+gam_spec/d1_long Job2_unc0.0
+gam_spec/d2_long Job2_unc0.0

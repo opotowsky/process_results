@@ -3,6 +3,7 @@
 import sys
 import glob
 import argparse
+import subprocess
 import numpy as np
 import pandas as pd
 #from mll_calc.all_jobs import job_dirs
@@ -56,6 +57,9 @@ def main():
     pred_df = calc_errors(pred_df, lbls) 
     
     pred_df.to_csv(results_path + args.unc_dir + '.csv')
+
+    for csv in csvs:
+        subprocess.run(['rm', csv])
 
     return
 
