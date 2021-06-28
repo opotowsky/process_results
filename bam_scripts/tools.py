@@ -215,3 +215,57 @@ def reg_randerr(df, idx, mll, knn, dtr, pred, metric):
                 df.loc[idx, (a, dfmetric)] = -mape
                 df.loc[idx, (a, dfstd)] = std
     return df
+
+def reg_rxtr_type(df, pred, rxtr, mll, knn, dtr):
+    predmll = {'reactor' : 'ReactorType', 
+               'burnup' : 'Burnup', 
+               'enrichment' : 'Enrichment', 
+               'cooling' : 'CoolingTime'
+               }
+    llmetric = '_Error'
+    errname = 'AbsError'    
+    
+    ### 1. MAE ###
+    dfmetric = 'Neg MAE'
+    dfstd = 'MAE Std'
+    ### MLL ###
+    col = mll[predmll[pred] + llmetric]
+    df.loc[(pred, rxtr), ('mll', dfmetric)] = -col.mean()
+    df.loc[(pred, rxtr), ('mll', dfstd)] = col.std()
+    ### Scikit ###
+    for a, A, alg in zip(['knn', 'dtree'], ['kNN', 'DTree'], [knn, dtr]):
+        col = alg[errname]
+        df.loc[(pred, rxtr), (a, dfmetric)] = -col.mean() 
+        df.loc[(pred, rxtr), (a, dfstd)] = col.std()
+    
+    ### 2. MedAE ###
+    dfmetric = 'Neg MedAE'
+    dfiqr1 = 'MedAE IQR_25'
+    dfiqr2 = 'MedAE IQR_75'
+    q = ['25%', '75%']
+    med = '50%'
+    ### MLL ###
+    col = mll[predmll[pred] + llmetric]
+    df.loc[(pred, rxtr), ('mll', dfmetric)] = -col.describe()[med]
+    df.loc[(pred, rxtr), ('mll', dfiqr1)] = -col.describe()[q[0]]
+    df.loc[(pred, rxtr), ('mll', dfiqr2)] = -col.describe()[q[1]]
+    ### Scikit ###
+    for a, A, alg in zip(['knn', 'dtree'], ['kNN', 'DTree'], [knn, dtr]):
+        col = alg[errname]
+        df.loc[(pred, rxtr), (a, dfmetric)] = -col.describe()[med]
+        df.loc[(pred, rxtr), (a, dfiqr1)] = -col.describe()[q[0]]
+        df.loc[(pred, rxtr), (a, dfiqr2)] = -col.describe()[q[1]]
+    
+    ### 3. MAPE ###
+    dfmetric = 'Neg MAPE'
+    dfstd = 'MAPE Std'
+    ### MLL ###
+    mape, std = MAPE(mll[predmll[pred]], mll['pred_' + predmll[pred]])
+    df.loc[(pred, rxtr), ('mll', dfmetric)] = -mape
+    df.loc[(pred, rxtr), ('mll', dfstd)] = std
+    ### Scikit ###
+    for a, A, alg in zip(['knn', 'dtree'], ['kNN', 'DTree'], [knn, dtr]):
+        mape, std = MAPE(alg['TrueY'], alg[A])
+        df.loc[(pred, rxtr), (a, dfmetric)] = -mape
+        df.loc[(pred, rxtr), (a, dfstd)] = std
+    return df
