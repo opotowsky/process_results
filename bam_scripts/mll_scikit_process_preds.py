@@ -25,10 +25,14 @@ def main():
     # for loops
     dets = ['nuc29', 'act32', 'act7/12', 'd1_hpge', 'd2_hpge', 'd3_czt', 'd6_sri2', 'd5_labr3', 'd4_nai']
     pred = args.pred
-    # for dataframes
+    # make empty dataframe
     algcol = ['knn_auto', 'dtree_auto', 'mll_auto', 'knn_short', 'dtree_short', 'mll_short', 'knn_long', 'dtree_long', 'mll_long']
-    scrcol  = [args.metric, 'Std']
-    errcol = ['Neg ' + args.metric, 'Std']
+    if pred == 'reactor':
+        levels = [algcol, []]
+    else:
+        levels = [algcol, []]
+    df = pd.DataFrame(index=dets, columns=pd.MultiIndex.from_product(levels, names=["Algorithm", "Metric"]))
+
     
     #####################
     #### MLL Results ####
@@ -49,12 +53,6 @@ def main():
         mll_short.append(pd.read_csv(mll_gam + d + '_short/' + job + '/' + job + '.csv').drop(columns=['Unnamed: 0', 'Unnamed: 0.1']))
         mll_long.append(pd.read_csv(mll_gam + d + '_long/' + job + '/' + job + '.csv').drop(columns=['Unnamed: 0', 'Unnamed: 0.1']))
     mll = {'short' : mll_short, '_auto' : mll_auto, 'long' : mll_long}
-    
-    if pred == 'reactor':
-        levels = [algcol, scrcol]
-    else:
-        levels = [algcol, errcol]
-    df = pd.DataFrame(index=dets, columns=pd.MultiIndex.from_product(levels, names=["Algorithm", "Metric"]))
     for i, d in enumerate(dets):
         ######################
         ### Scikit Results ###

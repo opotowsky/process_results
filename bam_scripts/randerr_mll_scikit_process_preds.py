@@ -19,21 +19,18 @@ def main():
     mll_path = rdrive + 'mll/nuc_conc/nuc29/'
     learn_path = rdrive + 'scikit/nuc_conc/rand_err/'
     pred = args.pred
-    # for dataframes
-    algcol = ['knn', 'dtree', 'mll']
-    scrcol  = [args.metric, 'Std']
-    errcol = ['Neg ' + args.metric, 'Std']
     # injected errors
     jobs = ['Job0_unc0.01', 'Job1_unc0.05', 'Job2_unc0.1', 'Job3_unc0.15', 'Job4_unc0.2']
     mll_errs = [1, 5, 10, 15, 20]
     sk_errs = [0, 0.3, 0.7, 1, 2, 4, 6, 8, 10, 13, 17, 20]
     all_errs = sorted(list(set(mll_errs) | set(sk_errs)))
     # create empty dataframe
+    algcol = ['knn', 'dtree', 'mll']
     if pred == 'reactor':
-        levels = [algcol, scrcol]
+        levels = [algcol, []]
     else:
-        levels = [algcol, errcol]
-    df = pd.DataFrame(index=, columns=pd.MultiIndex.from_product(levels, names=["Algorithm", "Metric"]))
+        levels = [algcol, []]
+    df = pd.DataFrame(index=all_errs, columns=pd.MultiIndex.from_product(levels, names=["Algorithm", "Metric"]))
     
     for err in all_errs:    
         #### MLL Results
