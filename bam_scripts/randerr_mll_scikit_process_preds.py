@@ -26,10 +26,7 @@ def main():
     all_errs = sorted(list(set(mll_errs) | set(sk_errs)))
     # create empty dataframe
     algcol = ['knn', 'dtree', 'mll']
-    if pred == 'reactor':
-        levels = [algcol, []]
-    else:
-        levels = [algcol, []]
+    levels = [algcol, []]
     df = pd.DataFrame(index=all_errs, columns=pd.MultiIndex.from_product(levels, names=["Algorithm", "Metric"]))
     
     for err in all_errs:    

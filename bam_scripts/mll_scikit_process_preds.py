@@ -27,10 +27,7 @@ def main():
     pred = args.pred
     # make empty dataframe
     algcol = ['knn_auto', 'dtree_auto', 'mll_auto', 'knn_short', 'dtree_short', 'mll_short', 'knn_long', 'dtree_long', 'mll_long']
-    if pred == 'reactor':
-        levels = [algcol, []]
-    else:
-        levels = [algcol, []]
+    levels = [algcol, []]
     df = pd.DataFrame(index=dets, columns=pd.MultiIndex.from_product(levels, names=["Algorithm", "Metric"]))
 
     
