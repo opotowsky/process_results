@@ -1,0 +1,11 @@
+reactor BalAcc
+reactor Acc
+burnup MAE
+burnup MedAE
+burnup MAPE
+enrichment MAE
+enrichment MedAE
+enrichment MAPE
+cooling MAE
+cooling MedAE
+cooling MAPE

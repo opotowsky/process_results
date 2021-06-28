@@ -1,104 +1,65 @@
 #! /usr/bin/env python3
 
+import sys
 import pickle
+import argparse
 import pandas as pd
-from sklearn.metrics import balanced_accuracy_score, mean_absolute_error, median_absolute_error
-
-def rxtr_metrics(i, df, d, mll, knn, dtr):
-    predmll = ['ReactorType', 'Burnup', 'Enrichment', 'CoolingTime']
-    llmetric = '_Score'
-    dfmetric = 'Accuracy'
-    dfstd = 'Acc Std'
-    errname = 'AbsError'    
-    ### MLL ###
-    df.loc[d, ('mll', dfmetric)] = balanced_accuracy_score(mll[predmll[i]], 
-                                                           mll['pred_' + predmll[i]], 
-                                                           adjusted=True)
-    df.loc[d, ('mll', dfstd)] = mll[predmll[i] + llmetric].std()
-    ### Scikit ###
-    for a, A, alg in zip(['knn', 'dtree'], ['kNN', 'DTree'], [knn, dtr]):
-        df.loc[d, (a, dfmetric)] = balanced_accuracy_score(alg['TrueY'],
-                                                           alg[A], 
-                                                           adjusted=True)
-        df.loc[d, (a, dfstd)] = alg[errname].std()
-    return df
-
-def reg_metrics(i, df, d, mll, knn, dtr, mean_or_med):
-    predmll = ['ReactorType', 'Burnup', 'Enrichment', 'CoolingTime']
-    llmetric = '_Error'
-    dfmetric = 'Neg MAE'
-    dfstd = 'MAE Std'
-    errname = 'AbsError'    
-    dfmetric1 = 'Neg MedAE SK'
-    dfmetric2 = 'Neg MedAE'
-    dfiqr1 = 'MedAE IQR_25'
-    dfiqr2 = 'MedAE IQR_75'
-    if mean_or_med == 'mean':
-        ### MLL ###
-        df.loc[d, ('mll', dfmetric)] = -mean_absolute_error(mll[predmll[i]], mll['pred_' + predmll[i]])
-        df.loc[d, ('mll', dfstd)] = mll[predmll[i] + llmetric].std()
-        ### Scikit ###
-        for a, A, alg in zip(['knn', 'dtree'], ['kNN', 'DTree'], [knn, dtr]):
-            df.loc[d, (a, dfmetric)] = -mean_absolute_error(alg['TrueY'], alg[A])
-            df.loc[d, (a, dfstd)] = alg[errname].std()
-    else:
-        q = ['25%', '75%']
-        med = '50%'
-        ### MLL ###
-        df.loc[d, ('mll', dfmetric1)] = -median_absolute_error(mll[predmll[i]], mll['pred_' + predmll[i]])
-        col = mll[predmll[i] + llmetric]
-        df.loc[d, ('mll', dfmetric2)] = -col.describe()[med]
-        df.loc[d, ('mll', dfiqr1)] = -col.describe()[q[0]]
-        df.loc[d, ('mll', dfiqr2)] = -col.describe()[q[1]]
-        ### Scikit ###
-        for a, A, alg in zip(['knn', 'dtree'], ['kNN', 'DTree'], [knn, dtr]):
-            df.loc[d, (a, dfmetric1)] = -median_absolute_error(alg['TrueY'], alg[A])
-            col = alg[errname]
-            df.loc[d, (a, dfmetric2)] = -col.describe()[med]
-            df.loc[d, (a, dfiqr1)] = -col.describe()[q[0]]
-            df.loc[d, (a, dfiqr2)] = -col.describe()[q[1]]
-    return df
+from tools import rxtr_randerr, reg_randerr
 
 def main():
+    parser = argparse.ArgumentParser(description='Processes mll and scikit prediction errors into .pkl files.')
+    parser.add_argument('pred', metavar='prediction', choices = ['reactor', 'burnup', 'enrichment', 'cooling'],
+                        help='string indicating which prediction error to process')
+    parser.add_argument('metric', metavar='error-metric', choices = ['MAE', 'MedAE', 'MAPE', 'BalAcc', 'Acc'],
+                        help='string indicating which error metric to use')
+    args = parser.parse_args(sys.argv[1:])
+
     # for filepaths
     rdrive = '/mnt/researchdrive/BOX_INTERNAL/opotowsky/'
-    mll_path = rdrive + 'mll/nuc_conc/train/'
+    mll_path = rdrive + 'mll/nuc_conc/nuc29/'
     learn_path = rdrive + 'scikit/nuc_conc/rand_err/'
-    csv_end = '_tset1.0_nuc29_random_error.csv'
-    pred = ['reactor', 'burnup', 'enrichment', 'cooling']
+    pred = args.pred
     # for dataframes
     algcol = ['knn', 'dtree', 'mll']
-    scrcol  = ['Accuracy', 'Acc Std']
-    errcol = ['Neg MAE', 'MAE Std']
+    scrcol  = [args.metric, 'Std']
+    errcol = ['Neg ' + args.metric, 'Std']
+    # injected errors
+    jobs = ['Job0_unc0.01', 'Job1_unc0.05', 'Job2_unc0.1', 'Job3_unc0.15', 'Job4_unc0.2']
+    mll_errs = [1, 5, 10, 15, 20]
+    sk_errs = [0, 0.3, 0.7, 1, 2, 4, 6, 8, 10, 13, 17, 20]
+    all_errs = sorted(list(set(mll_errs) | set(sk_errs)))
+    # create empty dataframe
+    if pred == 'reactor':
+        levels = [algcol, scrcol]
+    else:
+        levels = [algcol, errcol]
+    df = pd.DataFrame(index=, columns=pd.MultiIndex.from_product(levels, names=["Algorithm", "Metric"]))
     
-    #####################
-    #### MLL Results ####
-    #####################
-    job_act = 'Job0_unc0.05'
-    mll = pd.read_csv(mll_path + job_act + '/' + job_act + '.csv').drop(columns=['Unnamed: 0', 'Unnamed: 0.1'])
-    results = {}
-    for i, p in enumerate(pred):
-        if p == 'reactor':
-            levels = [algcol, scrcol]
+    for err in all_errs:    
+        #### MLL Results
+        if err in mll_errs:
+            i = mll_errs.index(err)
+            mll = pd.read_csv(mll_path + jobs[i] + '/' + jobs[i] + '.csv').drop(columns=['Unnamed: 0', 'Unnamed: 0.1'])
         else:
-            levels = [algcol, errcol]
-        df = pd.DataFrame(index=, columns=pd.MultiIndex.from_product(levels, names=["Algorithm", "Metric"]))
+            mll = None
         ### Scikit Results
-        knncsv = p + '_knn' + csv_end
-        dtrcsv = p + '_dtree' + csv_end
-        knn = pd.read_csv(learn_path + knncsv).drop(columns='Unnamed: 0')
-        dtr = pd.read_csv(learn_path + dtrcsv).drop(columns='Unnamed: 0')
-        ### Error Calcs
-        if p == 'reactor':
-            df = rxtr_metrics(i, df, d, mll, knn, dtr)
+        if err in sk_errs:
+            csv_end = '_tset1.0_nuc29_err' + str(err) + '_random_error.csv'
+            knncsv = pred + '_knn' + csv_end
+            dtrcsv = pred + '_dtree' + csv_end
+            knn = pd.read_csv(learn_path + knncsv).drop(columns='Unnamed: 0')
+            dtr = pd.read_csv(learn_path + dtrcsv).drop(columns='Unnamed: 0')
         else:
-            df = reg_metrics(i, df, d, mll, knn, dtr, 'mean')
-        results[p] = df
-        print('{} pred df complete'.format(p), flush=True)
+            knn = dtr = None
+        ### Error Calcs
+        if pred == 'reactor':
+            df = rxtr_randerr(df, err, mll, knn, dtr, pred, args.metric)
+        else:
+            df = reg_randerr(df, err, mll, knn, dtr, pred, args.metric)
+    print('{} {} pred df complete'.format(pred, args.metric), flush=True)
     
-    #with open(rdrive + 'processed_results/median_err_randerr_metrics_results_dict_mll_scikit_compare.pkl', 'wb') as pkl:
-    with open(rdrive + 'processed_results/randerr_metrics_results_dict_mll_scikit_compare.pkl', 'wb') as pkl:
-        pickle.dump(results, pkl)
+    pklname = args.pred + '_randerr_mll_scikit_compare_' + args.metric  + '.pkl'
+    df.to_pickle(rdrive + 'processed_results/' + pklname, protocol=4)
 
     return
 
