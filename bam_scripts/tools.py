@@ -269,3 +269,100 @@ def reg_rxtr_type(df, pred, rxtr, mll, knn, dtr):
         df.loc[(pred, rxtr), (a, dfmetric)] = -mape
         df.loc[(pred, rxtr), (a, dfstd)] = std
     return df
+
+def rxtr_sfco(df, case, pred, mll, knn, dtr):
+    predmll = {'reactor' : 'ReactorType', 
+               'burnup' : 'Burnup', 
+               'enrichment' : 'Enrichment', 
+               'cooling' : 'CoolingTime'
+               }
+    llmetric = '_Score'
+    errname = 'AbsError'    
+    
+    ### 1. Bal Accuracy ###    
+    dfmetric = 'Balanced Accuracy'
+    dfstd = 'BalAcc CI'
+    ### MLL ###
+    bal_acc = balanced_accuracy_score(mll[predmll[pred]],
+                                      mll['pred_' + predmll[pred]],
+                                      adjusted=True)
+    if bal_acc < 0:
+        bal_acc = 0.0
+    df.loc[(case, pred), ('mll', dfmetric)] = bal_acc
+    df.loc[(case, pred), ('mll', dfstd)] = conf_int(bal_acc, len(mll))
+    ### Scikit ###
+    for a, A, alg in zip(['knn', 'dtree'], ['kNN', 'DTree'], [knn, dtr]):
+        bal_acc = balanced_accuracy_score(alg['TrueY'], alg[A], adjusted=True)
+        if bal_acc < 0:
+            bal_acc = 0.0
+        df.loc[(case, pred), (a, dfmetric)] = bal_acc 
+        df.loc[(case, pred), (a, dfstd)] = conf_int(bal_acc, len(alg))
+
+    ### 2. Accuracy ###    
+    dfmetric = 'Accuracy'
+    dfstd = 'Acc CI'
+    ### MLL ###
+    acc = accuracy_score(mll[predmll[pred]], mll['pred_' + predmll[pred]])
+    df.loc[(case, pred), ('mll', dfmetric)] = acc 
+    df.loc[(case, pred), ('mll', dfstd)] = conf_int(acc, len(mll))
+    ### Scikit ###
+    for a, A, alg in zip(['knn', 'dtree'], ['kNN', 'DTree'], [knn, dtr]):
+        acc = accuracy_score(alg['TrueY'], alg[A])
+        df.loc[(case, pred), (a, dfmetric)] = acc
+        df.loc[(case, pred), (a, dfstd)] = conf_int(acc, len(alg))
+    
+    return df
+
+def reg_sfco(df, case, pred, mll, knn, dtr):
+    predmll = {'reactor' : 'ReactorType', 
+               'burnup' : 'Burnup', 
+               'enrichment' : 'Enrichment', 
+               'cooling' : 'CoolingTime'
+               }
+    llmetric = '_Error'
+    errname = 'AbsError'    
+    
+    ### 1. MAE ###
+    dfmetric = 'Neg MAE'
+    dfstd = 'MAE Std'
+    ### MLL ###
+    col = mll[predmll[pred] + llmetric]
+    df.loc[(case, pred), ('mll', dfmetric)] = -col.mean()
+    df.loc[(case, pred), ('mll', dfstd)] = col.std()
+    ### Scikit ###
+    for a, A, alg in zip(['knn', 'dtree'], ['kNN', 'DTree'], [knn, dtr]):
+        col = alg[errname]
+        df.loc[(case, pred), (a, dfmetric)] = -col.mean() 
+        df.loc[(case, pred), (a, dfstd)] = col.std()
+    
+    ### 2. MedAE ###
+    dfmetric = 'Neg MedAE'
+    dfiqr1 = 'MedAE IQR_25'
+    dfiqr2 = 'MedAE IQR_75'
+    q = ['25%', '75%']
+    med = '50%'
+    ### MLL ###
+    col = mll[predmll[pred] + llmetric]
+    df.loc[(case, pred), ('mll', dfmetric)] = -col.describe()[med]
+    df.loc[(case, pred), ('mll', dfiqr1)] = -col.describe()[q[0]]
+    df.loc[(case, pred), ('mll', dfiqr2)] = -col.describe()[q[1]]
+    ### Scikit ###
+    for a, A, alg in zip(['knn', 'dtree'], ['kNN', 'DTree'], [knn, dtr]):
+        col = alg[errname]
+        df.loc[(case, pred), (a, dfmetric)] = -col.describe()[med]
+        df.loc[(case, pred), (a, dfiqr1)] = -col.describe()[q[0]]
+        df.loc[(case, pred), (a, dfiqr2)] = -col.describe()[q[1]]
+    
+    ### 3. MAPE ###
+    dfmetric = 'Neg MAPE'
+    dfstd = 'MAPE Std'
+    ### MLL ###
+    mape, std = MAPE(mll[predmll[pred]], mll['pred_' + predmll[pred]])
+    df.loc[(case, pred), ('mll', dfmetric)] = -mape
+    df.loc[(case, pred), ('mll', dfstd)] = std
+    ### Scikit ###
+    for a, A, alg in zip(['knn', 'dtree'], ['kNN', 'DTree'], [knn, dtr]):
+        mape, std = MAPE(alg['TrueY'], alg[A])
+        df.loc[(case, pred), (a, dfmetric)] = -mape
+        df.loc[(case, pred), (a, dfstd)] = std
+    return df

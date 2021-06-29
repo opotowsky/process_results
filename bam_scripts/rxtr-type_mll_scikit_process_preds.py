@@ -14,7 +14,8 @@ def main():
     preds = ['burnup', 'cooling', 'enrichment']
     algcol = ['knn', 'dtree', 'mll']
     levels = [algcol, []]
-    df = pd.DataFrame(index=[preds, rxtrs], columns=pd.MultiIndex.from_product(levels, names=["Algorithm", "Metric"]))
+    df = pd.DataFrame(index=pd.MultiIndex.from_product([preds, rxtrs], names=['PredParam', 'RxtrType']), 
+                      columns=pd.MultiIndex.from_product(levels, names=['Algorithm', 'Metric']))
     
     for pred in preds:
         for rxtr in rxtrs:
