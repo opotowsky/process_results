@@ -83,8 +83,8 @@ def reg_metrics(df, idx, mll, knn, dtr, pred, metric):
                 df.loc[idx, (a+'_'+en_list, dfstd)] = col.std()
         elif metric == 'MedAE':
             dfmetric = 'Neg MedAE'
-            dfiqr1 = 'MedAE IQR_25'
-            dfiqr2 = 'MedAE IQR_75'
+            dfiqr1 = 'IQR_25'
+            dfiqr2 = 'IQR_75'
             ### MLL ###
             q = ['25%', '75%']
             med = '50%'
@@ -183,8 +183,8 @@ def reg_randerr(df, idx, mll, knn, dtr, pred, metric):
                 df.loc[idx, (a, dfstd)] = col.std()
     elif metric == 'MedAE':
         dfmetric = 'Neg MedAE'
-        dfiqr1 = 'MedAE IQR_25'
-        dfiqr2 = 'MedAE IQR_75'
+        dfiqr1 = 'IQR_25'
+        dfiqr2 = 'IQR_75'
         q = ['25%', '75%']
         med = '50%'
         ### MLL ###
@@ -226,47 +226,47 @@ def reg_rxtr_type(df, pred, rxtr, mll, knn, dtr):
     errname = 'AbsError'    
     
     ### 1. MAE ###
-    dfmetric = 'Neg MAE'
+    dfmetric = 'MAE'
     dfstd = 'MAE Std'
     ### MLL ###
     col = mll[predmll[pred] + llmetric]
-    df.loc[(pred, rxtr), ('mll', dfmetric)] = -col.mean()
+    df.loc[(pred, rxtr), ('mll', dfmetric)] = col.mean()
     df.loc[(pred, rxtr), ('mll', dfstd)] = col.std()
     ### Scikit ###
     for a, A, alg in zip(['knn', 'dtree'], ['kNN', 'DTree'], [knn, dtr]):
         col = alg[errname]
-        df.loc[(pred, rxtr), (a, dfmetric)] = -col.mean() 
+        df.loc[(pred, rxtr), (a, dfmetric)] = col.mean() 
         df.loc[(pred, rxtr), (a, dfstd)] = col.std()
     
     ### 2. MedAE ###
-    dfmetric = 'Neg MedAE'
-    dfiqr1 = 'MedAE IQR_25'
-    dfiqr2 = 'MedAE IQR_75'
+    dfmetric = 'MedAE'
+    dfiqr1 = 'IQR_25'
+    dfiqr2 = 'IQR_75'
     q = ['25%', '75%']
     med = '50%'
     ### MLL ###
     col = mll[predmll[pred] + llmetric]
-    df.loc[(pred, rxtr), ('mll', dfmetric)] = -col.describe()[med]
-    df.loc[(pred, rxtr), ('mll', dfiqr1)] = -col.describe()[q[0]]
-    df.loc[(pred, rxtr), ('mll', dfiqr2)] = -col.describe()[q[1]]
+    df.loc[(pred, rxtr), ('mll', dfmetric)] = col.describe()[med]
+    df.loc[(pred, rxtr), ('mll', dfiqr1)] = col.describe()[q[0]]
+    df.loc[(pred, rxtr), ('mll', dfiqr2)] = col.describe()[q[1]]
     ### Scikit ###
     for a, A, alg in zip(['knn', 'dtree'], ['kNN', 'DTree'], [knn, dtr]):
         col = alg[errname]
-        df.loc[(pred, rxtr), (a, dfmetric)] = -col.describe()[med]
-        df.loc[(pred, rxtr), (a, dfiqr1)] = -col.describe()[q[0]]
-        df.loc[(pred, rxtr), (a, dfiqr2)] = -col.describe()[q[1]]
+        df.loc[(pred, rxtr), (a, dfmetric)] = col.describe()[med]
+        df.loc[(pred, rxtr), (a, dfiqr1)] = col.describe()[q[0]]
+        df.loc[(pred, rxtr), (a, dfiqr2)] = col.describe()[q[1]]
     
     ### 3. MAPE ###
-    dfmetric = 'Neg MAPE'
+    dfmetric = 'MAPE'
     dfstd = 'MAPE Std'
     ### MLL ###
     mape, std = MAPE(mll[predmll[pred]], mll['pred_' + predmll[pred]])
-    df.loc[(pred, rxtr), ('mll', dfmetric)] = -mape
+    df.loc[(pred, rxtr), ('mll', dfmetric)] = mape
     df.loc[(pred, rxtr), ('mll', dfstd)] = std
     ### Scikit ###
     for a, A, alg in zip(['knn', 'dtree'], ['kNN', 'DTree'], [knn, dtr]):
         mape, std = MAPE(alg['TrueY'], alg[A])
-        df.loc[(pred, rxtr), (a, dfmetric)] = -mape
+        df.loc[(pred, rxtr), (a, dfmetric)] = mape
         df.loc[(pred, rxtr), (a, dfstd)] = std
     return df
 
@@ -323,46 +323,46 @@ def reg_sfco(df, case, pred, mll, knn, dtr):
     errname = 'AbsError'    
     
     ### 1. MAE ###
-    dfmetric = 'Neg MAE'
+    dfmetric = 'MAE'
     dfstd = 'MAE Std'
     ### MLL ###
     col = mll[predmll[pred] + llmetric]
-    df.loc[(case, pred), ('mll', dfmetric)] = -col.mean()
+    df.loc[(case, pred), ('mll', dfmetric)] = col.mean()
     df.loc[(case, pred), ('mll', dfstd)] = col.std()
     ### Scikit ###
     for a, A, alg in zip(['knn', 'dtree'], ['kNN', 'DTree'], [knn, dtr]):
         col = alg[errname]
-        df.loc[(case, pred), (a, dfmetric)] = -col.mean() 
+        df.loc[(case, pred), (a, dfmetric)] = col.mean() 
         df.loc[(case, pred), (a, dfstd)] = col.std()
     
     ### 2. MedAE ###
-    dfmetric = 'Neg MedAE'
-    dfiqr1 = 'MedAE IQR_25'
-    dfiqr2 = 'MedAE IQR_75'
+    dfmetric = 'MedAE'
+    dfiqr1 = 'IQR_25'
+    dfiqr2 = 'IQR_75'
     q = ['25%', '75%']
     med = '50%'
     ### MLL ###
     col = mll[predmll[pred] + llmetric]
-    df.loc[(case, pred), ('mll', dfmetric)] = -col.describe()[med]
-    df.loc[(case, pred), ('mll', dfiqr1)] = -col.describe()[q[0]]
-    df.loc[(case, pred), ('mll', dfiqr2)] = -col.describe()[q[1]]
+    df.loc[(case, pred), ('mll', dfmetric)] = col.describe()[med]
+    df.loc[(case, pred), ('mll', dfiqr1)] = col.describe()[q[0]]
+    df.loc[(case, pred), ('mll', dfiqr2)] = col.describe()[q[1]]
     ### Scikit ###
     for a, A, alg in zip(['knn', 'dtree'], ['kNN', 'DTree'], [knn, dtr]):
         col = alg[errname]
-        df.loc[(case, pred), (a, dfmetric)] = -col.describe()[med]
-        df.loc[(case, pred), (a, dfiqr1)] = -col.describe()[q[0]]
-        df.loc[(case, pred), (a, dfiqr2)] = -col.describe()[q[1]]
+        df.loc[(case, pred), (a, dfmetric)] = col.describe()[med]
+        df.loc[(case, pred), (a, dfiqr1)] = col.describe()[q[0]]
+        df.loc[(case, pred), (a, dfiqr2)] = col.describe()[q[1]]
     
     ### 3. MAPE ###
-    dfmetric = 'Neg MAPE'
+    dfmetric = 'MAPE'
     dfstd = 'MAPE Std'
     ### MLL ###
     mape, std = MAPE(mll[predmll[pred]], mll['pred_' + predmll[pred]])
-    df.loc[(case, pred), ('mll', dfmetric)] = -mape
+    df.loc[(case, pred), ('mll', dfmetric)] = mape
     df.loc[(case, pred), ('mll', dfstd)] = std
     ### Scikit ###
     for a, A, alg in zip(['knn', 'dtree'], ['kNN', 'DTree'], [knn, dtr]):
         mape, std = MAPE(alg['TrueY'], alg[A])
-        df.loc[(case, pred), (a, dfmetric)] = -mape
+        df.loc[(case, pred), (a, dfmetric)] = mape
         df.loc[(case, pred), (a, dfstd)] = std
     return df
