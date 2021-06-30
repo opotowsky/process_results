@@ -34,10 +34,11 @@ def main():
     #####################
     #### MLL Results ####
     #####################
+    job_nuc = 'Job0_unc0.01'
     job_act = 'Job2_unc0.01'
     job = 'Job2_unc0.0'
     # nuclide masses
-    n29mll = pd.read_csv(mll_nuc + 'nuc29/' + job_act + '/' + job_act + '.csv').drop(columns=['Unnamed: 0', 'Unnamed: 0.1'])
+    n29mll = pd.read_csv(mll_nuc + 'nuc29/' + job_nuc + '/' + job_nuc + '.csv').drop(columns=['Unnamed: 0', 'Unnamed: 0.1'])
     # activities
     a32mll = pd.read_csv(mll_gam + 'act32/' + job_act + '/' + job_act + '.csv').drop(columns=['Unnamed: 0', 'Unnamed: 0.1'])
     a12mll = pd.read_csv(mll_gam + 'act12/' + job_act + '/' + job_act + '.csv').drop(columns=['Unnamed: 0', 'Unnamed: 0.1'])
@@ -49,7 +50,7 @@ def main():
         mll_auto.append(pd.read_csv(mll_gam + d + '_auto/' + job + '/' + job + '.csv').drop(columns=['Unnamed: 0', 'Unnamed: 0.1']))
         mll_short.append(pd.read_csv(mll_gam + d + '_short/' + job + '/' + job + '.csv').drop(columns=['Unnamed: 0', 'Unnamed: 0.1']))
         mll_long.append(pd.read_csv(mll_gam + d + '_long/' + job + '/' + job + '.csv').drop(columns=['Unnamed: 0', 'Unnamed: 0.1']))
-    mll = {'short' : mll_short, '_auto' : mll_auto, 'long' : mll_long}
+    mll = {'short' : mll_short, 'auto' : mll_auto, 'long' : mll_long}
     for i, d in enumerate(dets):
         ######################
         ### Scikit Results ###
@@ -86,16 +87,16 @@ def main():
         ###################
         ### Error Calcs ###
         ###################
-        mll_d = {'short' : mll_short[i], '_auto' : mll_auto[i], 'long' : mll_long[i]}
-        knn = {'short' : knn_short, '_auto' : knn_auto, 'long' : knn_long}
-        dtr = {'short' : dtr_short, '_auto' : dtr_auto, 'long' : dtr_long}
+        mll_d = {'short' : mll_short[i], 'auto' : mll_auto[i], 'long' : mll_long[i]}
+        knn = {'short' : knn_short, 'auto' : knn_auto, 'long' : knn_long}
+        dtr = {'short' : dtr_short, 'auto' : dtr_auto, 'long' : dtr_long}
         if pred == 'reactor':
             df = rxtr_metrics(df, d, mll_d, knn, dtr, pred, args.metric)
         else:
             df = reg_metrics(df, d, mll_d, knn, dtr, pred, args.metric)
     print('{} {} pred df complete'.format(pred, args.metric), flush=True)
     
-    pklname = args.pred + '_mll_scikit_compare_' + args.metric  + '.pkl'
+    pklname = args.pred + '_detectors_mll_scikit_compare_' + args.metric  + '.pkl'
     df.to_pickle(rdrive + 'processed_results/' + pklname, protocol=4)
 
     return

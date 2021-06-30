@@ -25,7 +25,7 @@ def rxtr_metrics(df, idx, mll, knn, dtr, pred, metric):
                }
     llmetric = '_Score'
     errname = 'AbsError'    
-    for en_list in ['_short', '_auto', '_long']:
+    for en_list in ['short', 'auto', 'long']:
         if metric == 'BalAcc':
             dfmetric = 'Balanced Accuracy'
             dfstd = 'BalAcc CI'
@@ -33,28 +33,28 @@ def rxtr_metrics(df, idx, mll, knn, dtr, pred, metric):
             bal_acc = balanced_accuracy_score(mll[en_list][predmll[pred]],
                                               mll[en_list]['pred_' + predmll[pred]],
                                               adjusted=True)
-            df.loc[idx, ('mll'+en_list, dfmetric)] = bal_acc
-            df.loc[idx, ('mll'+en_list, dfstd)] = conf_int(bal_acc, len(mll[en_list]))
+            df.loc[idx, ('mll_'+en_list, dfmetric)] = bal_acc
+            df.loc[idx, ('mll_'+en_list, dfstd)] = conf_int(bal_acc, len(mll[en_list]))
             ### Scikit ###
             for a, A, alg in zip(['knn', 'dtree'], ['kNN', 'DTree'], [knn, dtr]):
                 bal_acc = balanced_accuracy_score(alg[en_list]['TrueY'], 
                                                   alg[en_list][A], 
                                                   adjusted=True)
-                df.loc[idx, (a+en_list, dfmetric)] = bal_acc 
-                df.loc[idx, (a+en_list, dfstd)] = conf_int(bal_acc, len(alg[en_list]))
+                df.loc[idx, (a+'_'+en_list, dfmetric)] = bal_acc 
+                df.loc[idx, (a+'_'+en_list, dfstd)] = conf_int(bal_acc, len(alg[en_list]))
         elif metric == 'Acc':
             dfmetric = 'Accuracy'
             dfstd = 'Acc CI'
             ### MLL ###
             acc = accuracy_score(mll[en_list][predmll[pred]],
                                  mll[en_list]['pred_' + predmll[pred]])
-            df.loc[idx, ('mll'+en_list, dfmetric)] = acc 
-            df.loc[idx, ('mll'+en_list, dfstd)] = conf_int(acc, len(mll[en_list]))
+            df.loc[idx, ('mll_'+en_list, dfmetric)] = acc 
+            df.loc[idx, ('mll_'+en_list, dfstd)] = conf_int(acc, len(mll[en_list]))
             ### Scikit ###
             for a, A, alg in zip(['knn', 'dtree'], ['kNN', 'DTree'], [knn, dtr]):
                 acc = accuracy_score(alg[en_list]['TrueY'], alg[en_list][A])
-                df.loc[idx, (a+en_list, dfmetric)] = acc
-                df.loc[idx, (a+en_list, dfstd)] = conf_int(acc, len(alg[en_list]))
+                df.loc[idx, (a+'_'+en_list, dfmetric)] = acc
+                df.loc[idx, (a+'_'+en_list, dfstd)] = conf_int(acc, len(alg[en_list]))
         else: #Other classification metrics
             # TODO
             df = df
@@ -68,19 +68,19 @@ def reg_metrics(df, idx, mll, knn, dtr, pred, metric):
                }
     llmetric = '_Error'
     errname = 'AbsError'    
-    for en_list in ['_short', '_auto', '_long']:
+    for en_list in ['short', 'auto', 'long']:
         if metric == 'MAE':
             dfmetric = 'Neg MAE'
             dfstd = 'MAE Std'
             ### MLL ###
             col = mll[en_list][predmll[pred] + llmetric]
-            df.loc[idx, ('mll'+en_list, dfmetric)] = -col.mean()
-            df.loc[idx, ('mll'+en_list, dfstd)] = col.std()
+            df.loc[idx, ('mll_'+en_list, dfmetric)] = -col.mean()
+            df.loc[idx, ('mll_'+en_list, dfstd)] = col.std()
             ### Scikit ###
             for a, A, alg in zip(['knn', 'dtree'], ['kNN', 'DTree'], [knn, dtr]):
                 col = alg[en_list][errname]
-                df.loc[idx, (a+en_list, dfmetric)] = -col.mean()
-                df.loc[idx, (a+en_list, dfstd)] = col.std()
+                df.loc[idx, (a+'_'+en_list, dfmetric)] = -col.mean()
+                df.loc[idx, (a+'_'+en_list, dfstd)] = col.std()
         elif metric == 'MedAE':
             dfmetric = 'Neg MedAE'
             dfiqr1 = 'MedAE IQR_25'
@@ -89,27 +89,27 @@ def reg_metrics(df, idx, mll, knn, dtr, pred, metric):
             q = ['25%', '75%']
             med = '50%'
             col = mll[en_list][predmll[pred] + llmetric]
-            df.loc[idx, ('mll'+en_list, dfmetric)] = -col.describe()[med]
-            df.loc[idx, ('mll'+en_list, dfiqr1)] = -col.describe()[q[0]]
-            df.loc[idx, ('mll'+en_list, dfiqr2)] = -col.describe()[q[1]]
+            df.loc[idx, ('mll_'+en_list, dfmetric)] = -col.describe()[med]
+            df.loc[idx, ('mll_'+en_list, dfiqr1)] = -col.describe()[q[0]]
+            df.loc[idx, ('mll_'+en_list, dfiqr2)] = -col.describe()[q[1]]
             ### Scikit ###
             for a, A, alg in zip(['knn', 'dtree'], ['kNN', 'DTree'], [knn, dtr]):
                 col = alg[en_list][errname]
-                df.loc[idx, (a+en_list, dfmetric)] = -col.describe()[med]
-                df.loc[idx, (a+en_list, dfiqr1)] = -col.describe()[q[0]]
-                df.loc[idx, (a+en_list, dfiqr2)] = -col.describe()[q[1]]
+                df.loc[idx, (a+'_'+en_list, dfmetric)] = -col.describe()[med]
+                df.loc[idx, (a+'_'+en_list, dfiqr1)] = -col.describe()[q[0]]
+                df.loc[idx, (a+'_'+en_list, dfiqr2)] = -col.describe()[q[1]]
         else: #MAPE
             dfmetric = 'Neg MAPE'
             dfstd = 'MAPE Std'
             ### MLL ###
             mape, std = MAPE(mll[en_list][predmll[pred]], mll[en_list]['pred_' + predmll[pred]])
-            df.loc[idx, ('mll'+en_list, dfmetric)] = -mape
-            df.loc[idx, ('mll'+en_list, dfstd)] = std
+            df.loc[idx, ('mll_'+en_list, dfmetric)] = -mape
+            df.loc[idx, ('mll_'+en_list, dfstd)] = std
             ### Scikit ###
             for a, A, alg in zip(['knn', 'dtree'], ['kNN', 'DTree'], [knn, dtr]):
                 mape, std = MAPE(alg[en_list]['TrueY'], alg[en_list][A])
-                df.loc[idx, (a+en_list, dfmetric)] = -mape
-                df.loc[idx, (a+en_list, dfstd)] = std
+                df.loc[idx, (a+'_'+en_list, dfmetric)] = -mape
+                df.loc[idx, (a+'_'+en_list, dfstd)] = std
     return df
 
 def rxtr_randerr(df, idx, mll, knn, dtr, pred, metric):
