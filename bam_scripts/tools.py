@@ -13,7 +13,8 @@ def MAPE(y_true,y_pred):
 def conf_int(metric, n):
     # for 1 std dev, 68% conf
     # can change to 95%, which is 1.96 std dev
-    z = 1 
+    # updated tp 99% conf
+    z = 2.576 
     ci = z * np.sqrt(metric * (1 - metric) / n)
     return ci
 
