@@ -22,7 +22,7 @@ def main():
     # injected errors
     jobs = ['Job0_unc0.01', 'Job1_unc0.05', 'Job2_unc0.1', 'Job3_unc0.15', 'Job4_unc0.2']
     mll_errs = [1, 5, 10, 15, 20]
-    sk_errs = [0, 0.3, 0.7, 1, 2, 4, 6, 8, 10, 13, 17, 20]
+    sk_errs = [0, 1, 2, 5, 8, 10, 12, 15, 18, 20]
     all_errs = sorted(list(set(mll_errs) | set(sk_errs)))
     # create empty dataframe
     algcol = ['knn', 'dtree', 'mll']

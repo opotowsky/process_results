@@ -122,7 +122,7 @@ def rxtr_randerr(df, idx, mll, knn, dtr, pred, metric):
     llmetric = '_Score'
     errname = 'AbsError'    
     mll_errs = [1, 5, 10, 15, 20]
-    sk_errs = [0, 0.3, 0.7, 1, 2, 4, 6, 8, 10, 13, 17, 20]
+    sk_errs = [0, 1, 2, 5, 8, 10, 12, 15, 18, 20]
     if metric == 'BalAcc':
         dfmetric = 'Balanced Accuracy'
         dfstd = 'BalAcc CI'
@@ -167,7 +167,7 @@ def reg_randerr(df, idx, mll, knn, dtr, pred, metric):
     llmetric = '_Error'
     errname = 'AbsError'    
     mll_errs = [1, 5, 10, 15, 20]
-    sk_errs = [0, 0.3, 0.7, 1, 2, 4, 6, 8, 10, 13, 17, 20]
+    sk_errs = [0, 1, 2, 5, 8, 10, 12, 15, 18, 20]
     if metric == 'MAE':
         dfmetric = 'Neg MAE'
         dfstd = 'MAE Std'
