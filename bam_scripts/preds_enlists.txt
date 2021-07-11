@@ -1,0 +1,9 @@
+burnup auto
+burnup short
+burnup long
+enrichment auto
+enrichment short
+enrichment long
+cooling auto
+cooling short
+cooling long
