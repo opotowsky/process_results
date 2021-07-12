@@ -3,6 +3,7 @@
 import sys
 import pickle
 import argparse
+import numpy as np
 import pandas as pd
 from tools import rxtr_metrics, reg_metrics
 
